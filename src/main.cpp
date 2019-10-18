@@ -179,9 +179,9 @@ void usercontrol(void) {
                    vex::velocityUnits::pct);
     RightMotor.spin(vex::directionType::rev, Controller1.Axis3.position(),
                     vex::velocityUnits::pct);
-    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position(),
+    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position()/2.0,
                   vex::velocityUnits::pct);
-    FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position(),
+    FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position()/2.0,
                    vex::velocityUnits::pct);
     if (Controller2.ButtonR1.pressing()) {
       RightClaw.setPosition(-50, vex::pct);
