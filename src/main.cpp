@@ -1,3 +1,35 @@
+// To complete the VEXcode V5 Text project upgrade process, please follow the
+// steps below.
+// 
+// 1. You can use the Robot Configuration window to recreate your V5 devices
+//   - including any motors, sensors, 3-wire devices, and controllers.
+// 
+// 2. All previous code located in main.cpp has now been commented out. You
+//   will need to migrate this code to the new "int main" structure created
+//   below and keep in mind any new device names you may have set from the
+//   Robot Configuration window. 
+// 
+// If you would like to go back to your original project, a complete backup
+// of your original (pre-upgraded) project was created in a backup folder
+// inside of this project's folder.
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+// int main() {
+//   // Initializing Robot Configuration. DO NOT REMOVE!
+//   vexcodeInit();
+  
+// }
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// ---- END VEXCODE CONFIGURED DEVICES ----
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /*    Module:       main.cpp                                                  */
@@ -27,6 +59,8 @@ vex::motor liftfrontright = vex::motor(vex::PORT17);
 vex::motor liftfrontleft = vex::motor(vex::PORT20, true);
 vex::motor liftbackright = vex::motor(vex::PORT11, true);
 vex::motor liftbackleft = vex::motor(vex::PORT9);
+vex::motor clawR = vex::motor(vex::PORT19);
+vex::motor clawL = vex::motor(vex::PORT12);
 // vex::servo RightClaw = vex::servo(Brain.ThreeWirePort.H);
 // vex::servo LeftClaw = vex::servo(Brain.ThreeWirePort.B);
 
@@ -73,7 +107,7 @@ void pre_auton(void) {
   wait(50, msec);
 
   // Select the autonomous routine to run
-  while (!Controller1.ButtonA.pressing()) {
+  /*while (!Controller1.ButtonA.pressing()) {
     if ((!bUp && Controller1.ButtonUp.pressing()) ||
         (!bDown && Controller1.ButtonDown.pressing())) {
       if (sel == 0) {
@@ -126,7 +160,7 @@ void pre_auton(void) {
     bLeft = Controller1.ButtonLeft.pressing();
 
     wait(50, msec);
-  }
+  }*/
 
   Controller1.Screen.clearLine(3);
   wait(50, msec);
@@ -174,21 +208,23 @@ void autonomous(void) {
 
 void usercontrol(void) {
   // User control code here, inside the loop
+  clawR.resetRotation();
+  clawL.resetRotation();
   while (1) {
     LeftMotor.spin(vex::directionType::rev, Controller1.Axis2.position(),
                    vex::velocityUnits::pct);
     RightMotor.spin(vex::directionType::rev, Controller1.Axis3.position(),
                     vex::velocityUnits::pct);
-    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position()/2.0,
+    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position()/3.0,
                   vex::velocityUnits::pct);
-    FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position()/2.0,
+    FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position()/3.0,
                    vex::velocityUnits::pct);
     if (Controller2.ButtonR1.pressing()) {
-      RightClaw.setPosition(-50, vex::pct);
-      LeftClaw.setPosition(50, vex::pct);
+      clawL.rotateTo(95, rotationUnits::deg, false);
+      clawR.rotateTo(-95, rotationUnits::deg, false);
     } else if (Controller2.ButtonL1.pressing()) {
-      RightClaw.setPosition(100, vex::pct);
-      LeftClaw.setPosition(-150, vex::pct);
+      clawL.rotateTo(45, rotationUnits::deg, false);
+      clawR.rotateTo(-45, rotationUnits::deg, false);
     }
 
     // This is the main execution loop for the user control program.

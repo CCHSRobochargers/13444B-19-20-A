@@ -8,8 +8,6 @@ using code = vision::code;
 brain  Brain;
 
 // VEXcode device constructors
-servo LeftClaw = servo(Brain.ThreeWirePort.B);
-servo RightClaw = servo(Brain.ThreeWirePort.H);
 
 // VEXcode generated functions
 

@@ -3,8 +3,6 @@ using namespace vex;
 extern brain Brain;
 
 // VEXcode devices
-extern servo LeftClaw;
-extern servo RightClaw;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.
