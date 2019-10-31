@@ -139,11 +139,20 @@ void autonomous(void) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-
+void clawPinch(void) {
+  clawL.rotateTo(90, rotationUnits::deg, false);
+  clawR.rotateTo(90, rotationUnits::deg, false);
+}
+void clawOpen(void) {
+  clawL.rotateTo(0, rotationUnits::deg, false);
+  clawR.rotateTo(0, rotationUnits::deg, false);
+}
 void usercontrol(void) {
   // User control code here, inside the loop
   clawR.resetRotation();
   clawL.resetRotation();
+  Controller2.ButtonR1.pressed(clawOpen);
+  Controller2.ButtonL1.pressed(clawPinch);
   while (1) {
     LeftMotor.spin(vex::directionType::rev, Controller1.Axis2.position(),
                    vex::velocityUnits::pct);
@@ -153,27 +162,21 @@ void usercontrol(void) {
                   vex::velocityUnits::pct);
     FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position() / 3.0,
                    vex::velocityUnits::pct);
-    if (Controller2.ButtonR1.pressing()) {
-      clawL.rotateTo(90, rotationUnits::deg, false);
-      clawR.rotateTo(-90, rotationUnits::deg, false);
-    } else if (Controller2.ButtonL1.pressing()) {
-      clawL.rotateTo(45, rotationUnits::deg, false);
-      clawR.rotateTo(-45, rotationUnits::deg, false);
-    }
-
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
   }
+
+  // This is the main execution loop for the user control program.
+  // Each time through the loop your program should update motor + servo
+  // values based on feedback from the joysticks.
+
+  // ........................................................................
+  // Insert user code here. This is where you use the joystick values to
+  // update your motors, etc.
+  // ........................................................................
+
+  wait(20, msec); // Sleep the task for a short amount of time to
+                  // prevent wasted resources.
 }
+
 
 //
 // Main will set up the competition functions and callbacks.
