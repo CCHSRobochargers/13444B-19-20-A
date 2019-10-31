@@ -23,7 +23,6 @@ using namespace vex;
 // int main() {
 //   // Initializing Robot Configuration. DO NOT REMOVE!
 //   vexcodeInit();
-
 // }
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
@@ -162,6 +161,18 @@ void usercontrol(void) {
                   vex::velocityUnits::pct);
     FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position() / 3.0,
                    vex::velocityUnits::pct);
+
+    // This is the main execution loop for the user control program.
+    // Each time through the loop your program should update motor + servo
+    // values based on feedback from the joysticks.
+
+    // ........................................................................
+    // Insert user code here. This is where you use the joystick values to
+    // update your motors, etc.
+    // ........................................................................
+
+    wait(20, msec); // Sleep the task for a short amount of time to
+                    // prevent wasted resources.
   }
 
   // This is the main execution loop for the user control program.
