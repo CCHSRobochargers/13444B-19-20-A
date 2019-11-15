@@ -45,6 +45,7 @@ using namespace vex;
 // RightClaw            servo         H
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
+#include "field250.h" // Field graphic (250x250 pixels PNG)
 #include "vex.h"
 
 using namespace vex;
@@ -52,11 +53,12 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-vex::motor LeftMotor = vex::motor(vex::PORT1, vex::gearSetting::ratio36_1, true);
+vex::motor LeftMotor =
+    vex::motor(vex::PORT1, vex::gearSetting::ratio36_1, true);
 vex::motor RightMotor = vex::motor(vex::PORT10, vex::gearSetting::ratio36_1);
 vex::motor liftfrontright = vex::motor(vex::PORT17);
 vex::motor liftfrontleft = vex::motor(vex::PORT20, true);
-vex::motor liftbackright = vex::motor(vex::PORT11, true);
+vex::motor liftbackright = vex::motor(vex::PORT13, true);
 vex::motor liftbackleft = vex::motor(vex::PORT9);
 vex::motor clawR = vex::motor(vex::PORT19);
 vex::motor clawL = vex::motor(vex::PORT12);
@@ -70,15 +72,49 @@ drivetrain Drivetrain =
 vex::controller Controller1 = vex::controller(controllerType::primary);
 vex::controller Controller2 = vex::controller(controllerType::partner);
 
-typedef enum { Red, Blue } allianceSelType;
-const char *allianceText[] = {"Red", "Blue"};
-allianceSelType allianceSelect = Red;
+#define FIELD_GRAPHIC_WIDTH 250
+#define FIELD_GRAPHIC_HEIGHT 250
+#define BRAIN_SCREEN_WIDTH 480
+#define BRAIN_SCREEN_HEIGHT 272
+// Center on the X axis
+#define FIELD_LOC_X ((BRAIN_SCREEN_WIDTH / 2) - (FIELD_GRAPHIC_WIDTH / 2))
+// Put on the bottom on the Y axis
+#define FIELD_LOC_Y ((BRAIN_SCREEN_HEIGHT - 25) - FIELD_GRAPHIC_HEIGHT)
 
+typedef struct {
+  const char *label;
+  int x;
+  int y;
+  int width;
+  int height;
+} hotspotType;
+
+// The (0,0) origin of the screen is top left
 #define NUM_AUTO 5
-const char *autoText[NUM_AUTO] = {"None", "Big", "Small", "Big1", "Small1"};
-int autoSelect = 0;
-// define your global instances of motors and other devices here
+hotspotType autoHotspots[NUM_AUTO] = {
+    {"None        ", (FIELD_GRAPHIC_HEIGHT / 2) - 25,
+     (FIELD_GRAPHIC_WIDTH / 2) - 25, 50, 50},
+    {"4 POINT RED ", 0, 0, 50, 50},
+    {"1 POINT     ", 0, FIELD_GRAPHIC_WIDTH - 50, 50, 50},
+    {"4 POINT BLUE", FIELD_GRAPHIC_HEIGHT - 50, 0, 50, 50},
+    {"1 POINT     ", FIELD_GRAPHIC_HEIGHT - 50, FIELD_GRAPHIC_WIDTH - 50, 50,
+     50},
+};
 
+// Which autonomous was selected (defaults to "none")
+int autoSelect = 0;
+
+// Button pressed (or not) math
+bool isPressed(int idx, int X, int Y) {
+  if ((X >= autoHotspots[idx].x) &&
+      (X <= autoHotspots[idx].x + autoHotspots[idx].width) &&
+      (Y >= autoHotspots[idx].y) &&
+      (Y <= autoHotspots[idx].y + autoHotspots[idx].width)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
 /*                                                                           */
@@ -90,13 +126,67 @@ int autoSelect = 0;
 /*---------------------------------------------------------------------------*/
 
 void pre_auton(void) {
+  int fingerX;
+  int fingerY;
 
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
 
-  // Select the autonomous routine to run
-  Controller1.rumble(rumbleShort);
-  wait(50, msec);
+  // All activities that occur before the competition starts
+  // Example: clearing encoders, setting servo positions, ...
+
+  // "Accept" button
+  Brain.Screen.drawCircle(55, FIELD_LOC_Y + (FIELD_GRAPHIC_HEIGHT / 2), 50,
+                          color::green);
+
+  // Set the screen origin to where we want the field grapic. Makes the math
+  // easier.
+  Brain.Screen.setOrigin(FIELD_LOC_X, FIELD_LOC_Y);
+
+  Brain.Screen.drawImageFromBuffer(field_250_png, 0, 0, field_250_png_len);
+  // Draw squares for the buttons
+  for (int j = 0; j < NUM_AUTO; j++) {
+    Brain.Screen.drawRectangle(autoHotspots[j].x, autoHotspots[j].y,
+                               autoHotspots[j].width, autoHotspots[j].height,
+                               color::transparent);
+  }
+
+  while (true) {
+    if (Brain.Screen.pressing()) {
+      fingerX = Brain.Screen.xPosition();
+      fingerY = Brain.Screen.yPosition();
+      // Press to the left of the field graphic to accept
+      if (fingerX < -10) {
+        break;
+      }
+      for (int j = 0; j < NUM_AUTO; j++) {
+        if (isPressed(j, fingerX, fingerY)) {
+          autoSelect = j;
+          // Need to reset the origin to print the label under the green button
+          Brain.Screen.setOrigin(0, 0);
+          Brain.Screen.setCursor(11, 1);
+          Brain.Screen.print(autoHotspots[j].label);
+          Brain.Screen.setOrigin(FIELD_LOC_X, FIELD_LOC_Y);
+        }
+      }
+    }
+    wait(20, msec);
+  }
+
+  // Redraw with only the selected routine
+  Brain.Screen.drawImageFromBuffer(field_250_png, 0, 0, field_250_png_len);
+  Brain.Screen.drawRectangle(
+      autoHotspots[autoSelect].x, autoHotspots[autoSelect].y,
+      autoHotspots[autoSelect].width, autoHotspots[autoSelect].height,
+      color::transparent);
+
+  Brain.Screen.setOrigin(0, 0);
+  // Clear the temporary label
+  Brain.Screen.setCursor(11, 1);
+  Brain.Screen.print("          ");
+  // Print the selected autonomous on the button
+  Brain.Screen.setCursor(2, 1);
+  Brain.Screen.print(autoHotspots[autoSelect].label);
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
@@ -115,29 +205,71 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  //Drivetrain.setVelocity(100,vex::velocityUnits::pct);
-  /*clawL.rotateTo(45.0, rotationUnits::deg, false);
-  clawR.rotateTo(-45.0, rotationUnits::deg, false);
-  Drivetrain.driveFor(92.0, inches);
-  Drivetrain.turnFor(-72, degrees);
-  Drivetrain.driveFor(12.0, inches);
-  clawL.rotateTo(105, rotationUnits::deg, false);
-  clawR.rotateTo(-105, rotationUnits::deg, false);
-  Drivetrain.driveFor(16.0, inches);
-  Drivetrain.turnFor(-72, degrees);
-  Drivetrain.driveFor(60.0, inches);
-  Drivetrain.turnFor(72, degrees);
-  Drivetrain.driveFor(55.0, inches);*/
-  //Complicated WIP autonomous
-  //BLUE SIDE
-
-  clawR.rotateTo(15, rotationUnits::deg, false);
-  clawL.rotateTo(-15, rotationUnits::deg, false);
-  Drivetrain.driveFor(-16.0, inches);
-  Drivetrain.driveFor(8, inches);
-  clawR.rotateTo(0, rotationUnits::deg, false);
-  clawL.rotateTo(0, rotationUnits::deg, false);
-  //competition ready simple code, gets 1 point 
+  if (autoSelect == 0) {
+    clawR.rotateTo(15, rotationUnits::deg, false);
+    clawL.rotateTo(-15, rotationUnits::deg, false);
+    Drivetrain.driveFor(-34.0, inches);
+    Drivetrain.driveFor(10, inches);
+    clawR.rotateTo(0, rotationUnits::deg, false);
+    clawL.rotateTo(0, rotationUnits::deg, false);
+    //change this to "return;" after competition
+  } else if (autoSelect == 1) {
+    clawL.rotateTo(-33, rotationUnits::deg, false);
+    clawR.rotateTo(33, rotationUnits::deg, false);
+    Drivetrain.driveFor(-9.0, inches);
+    Drivetrain.driveFor(16, inches);
+    Drivetrain.turnFor(-90, rotationUnits::deg);
+    Drivetrain.driveFor(48, inches);
+    Drivetrain.turnFor(90, rotationUnits::deg);
+    Drivetrain.driveFor(4, inches);
+    clawL.rotateTo(-105, rotationUnits::deg, false);
+    clawR.rotateTo(105, rotationUnits::deg);
+    Drivetrain.driveFor(-4, inches);
+    Drivetrain.turnFor(90, rotationUnits::deg);
+    Drivetrain.driveFor(40, inches);
+    Drivetrain.turnFor(90, rotationUnits::deg);
+    Drivetrain.driveFor(16, inches);
+    clawL.rotateTo(-33, rotationUnits::deg, false);
+    clawR.rotateTo(33, rotationUnits::deg);
+    Drivetrain.driveFor(-4, inches);
+    // scores 4 points in (uknown) corner
+  } else if (autoSelect == 2) {
+    clawR.rotateTo(15, rotationUnits::deg, false);
+    clawL.rotateTo(-15, rotationUnits::deg, false);
+    Drivetrain.driveFor(34.0, inches);
+    Drivetrain.driveFor(-10, inches);
+    clawR.rotateTo(0, rotationUnits::deg, false);
+    clawL.rotateTo(0, rotationUnits::deg, false);
+    // scores 1 point in any corner
+  } else if (autoSelect == 3) {
+    clawL.rotateTo(-33, rotationUnits::deg, false);
+    clawR.rotateTo(33, rotationUnits::deg, false);
+    Drivetrain.driveFor(-9.0, inches);
+    Drivetrain.driveFor(16, inches);
+    Drivetrain.turnFor(90, rotationUnits::deg);
+    Drivetrain.driveFor(48, inches);
+    Drivetrain.turnFor(-90, rotationUnits::deg);
+    Drivetrain.driveFor(4, inches);
+    clawL.rotateTo(-105, rotationUnits::deg, false);
+    clawR.rotateTo(105, rotationUnits::deg);
+    Drivetrain.driveFor(-4, inches);
+    Drivetrain.turnFor(-90, rotationUnits::deg);
+    Drivetrain.driveFor(40, inches);
+    Drivetrain.turnFor(-90, rotationUnits::deg);
+    Drivetrain.driveFor(16, inches);
+    clawL.rotateTo(-33, rotationUnits::deg, false);
+    clawR.rotateTo(33, rotationUnits::deg);
+    Drivetrain.driveFor(-4, inches);
+    // scores 4 points in (unknown) corner
+  } else if (autoSelect == 4) {
+    clawR.rotateTo(15, rotationUnits::deg, false);
+    clawL.rotateTo(-15, rotationUnits::deg, false);
+    Drivetrain.driveFor(34.0, inches);
+    Drivetrain.driveFor(-10, inches);
+    clawR.rotateTo(0, rotationUnits::deg, false);
+    clawL.rotateTo(0, rotationUnits::deg, false);
+    // scores 1 point in any corner
+  }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -150,8 +282,8 @@ void autonomous(void) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 void clawPinch(void) {
-  clawL.rotateTo(-105, rotationUnits::deg, false);
-  clawR.rotateTo(105, rotationUnits::deg, false);
+  clawL.rotateTo(-115, rotationUnits::deg, false);
+  clawR.rotateTo(115, rotationUnits::deg, false);
 }
 void clawOpen(void) {
   clawL.rotateTo(-33, rotationUnits::deg, false);
@@ -198,7 +330,6 @@ void usercontrol(void) {
   wait(20, msec); // Sleep the task for a short amount of time to
                   // prevent wasted resources.
 }
-
 
 //
 // Main will set up the competition functions and callbacks.
