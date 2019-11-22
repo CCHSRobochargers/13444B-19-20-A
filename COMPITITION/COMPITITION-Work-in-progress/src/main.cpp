@@ -53,9 +53,8 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-vex::motor LeftMotor =
-    vex::motor(vex::PORT3, vex::gearSetting::ratio36_1, true);
-vex::motor RightMotor = vex::motor(vex::PORT10, vex::gearSetting::ratio36_1);
+vex::motor LeftMotor = vex::motor(vex::PORT3, true);
+vex::motor RightMotor = vex::motor(vex::PORT10);
 vex::motor liftfrontright = vex::motor(vex::PORT17);
 vex::motor liftfrontleft = vex::motor(vex::PORT20, true);
 vex::motor liftbackright = vex::motor(vex::PORT14, true);
@@ -207,68 +206,36 @@ void pre_auton(void) {
 
 void autonomous(void) {
   if (autoSelect == 0) {
-    // clawR.rotateTo(15, rotationUnits::deg, false);
-    // clawL.rotateTo(-15, rotationUnits::deg, false);
-    Drivetrain.driveFor(-34.0, inches);
-    Drivetrain.driveFor(10, inches);
-    // clawR.rotateTo(0, rotationUnits::deg, false);
-    // clawL.rotateTo(0, rotationUnits::deg, false);
-    // change this to "return;" after competition
+    return;
   } else if (autoSelect == 1) {
-    // clawL.rotateTo(-33, rotationUnits::deg, false);
-    // clawR.rotateTo(33, rotationUnits::deg, false);
-    Drivetrain.driveFor(-9.0, inches);
-    Drivetrain.driveFor(16, inches);
-    Drivetrain.turnFor(-90, rotationUnits::deg);
-    Drivetrain.driveFor(48, inches);
-    Drivetrain.turnFor(90, rotationUnits::deg);
-    Drivetrain.driveFor(4, inches);
-    // clawL.rotateTo(-105, rotationUnits::deg, false);
-    // clawR.rotateTo(105, rotationUnits::deg);
-    Drivetrain.driveFor(-4, inches);
-    Drivetrain.turnFor(90, rotationUnits::deg);
-    Drivetrain.driveFor(40, inches);
-    Drivetrain.turnFor(90, rotationUnits::deg);
-    Drivetrain.driveFor(16, inches);
-    // clawL.rotateTo(-33, rotationUnits::deg, false);
-    // clawR.rotateTo(33, rotationUnits::deg);
-    Drivetrain.driveFor(-4, inches);
+    BackLift.rotateTo(-100, degrees);
+    Drivetrain.turnFor(90, degrees);
+    Drivetrain.turnFor(-90, degrees);
+
     // scores 4 points in (uknown) corner
   } else if (autoSelect == 2) {
-    // clawR.rotateTo(15, rotationUnits::deg, false);
-    // clawL.rotateTo(-15, rotationUnits::deg, false);
     Drivetrain.driveFor(34.0, inches);
     Drivetrain.driveFor(-10, inches);
-    // clawR.rotateTo(0, rotationUnits::deg, false);
-    // clawL.rotateTo(0, rotationUnits::deg, false);
     // scores 1 point in any corner
   } else if (autoSelect == 3) {
-    // clawL.rotateTo(-33, rotationUnits::deg, false);
-    // clawR.rotateTo(33, rotationUnits::deg, false);
-    Drivetrain.driveFor(-9.0, inches);
-    Drivetrain.driveFor(16, inches);
-    Drivetrain.turnFor(90, rotationUnits::deg);
-    Drivetrain.driveFor(48, inches);
-    Drivetrain.turnFor(-90, rotationUnits::deg);
-    Drivetrain.driveFor(4, inches);
-    // clawL.rotateTo(-105, rotationUnits::deg, false);
-    // clawR.rotateTo(105, rotationUnits::deg);
-    Drivetrain.driveFor(-4, inches);
-    Drivetrain.turnFor(-90, rotationUnits::deg);
-    Drivetrain.driveFor(40, inches);
-    Drivetrain.turnFor(-90, rotationUnits::deg);
-    Drivetrain.driveFor(16, inches);
-    // clawL.rotateTo(-33, rotationUnits::deg, false);
-    // clawR.rotateTo(33, rotationUnits::deg);
-    Drivetrain.driveFor(-4, inches);
+    Drivetrain.driveFor(-9, inches);
+     Drivetrain.turnFor(-10, degrees);
+    Drivetrain.driveFor(27, inches);
+    Drivetrain.turnFor(-90, degrees);
+    Drivetrain.driveFor(22, inches);
+    Claw.rotateTo(900, degrees, false);
+    wait(0.5, sec);
+    BackLift.rotateTo(-100, degrees);
+    Drivetrain.driveFor(-3, inches);
+    Drivetrain.turnFor(90, degrees);
+    Drivetrain.driveFor(36, inches);
+    Drivetrain.turnFor(90, degrees);
+    Drivetrain.driveFor(22, inches);
+    BackLift.rotateTo(0, degrees);
+    Claw.rotateTo(400, degrees);
     // scores 4 points in (unknown) corner
   } else if (autoSelect == 4) {
-    // clawR.rotateTo(15, rotationUnits::deg, false);
-    // clawL.rotateTo(-15, rotationUnits::deg, false);
-    Drivetrain.driveFor(34.0, inches);
-    Drivetrain.driveFor(-10, inches);
-    // clawR.rotateTo(0, rotationUnits::deg, false);
-    // clawL.rotateTo(0, rotationUnits::deg, false);
+    
     // scores 1 point in any corner
   }
 }
@@ -285,12 +252,12 @@ void autonomous(void) {
 void clawPinch(void) {
   // clawL.rotateTo(-115, rotationUnits::deg, false);
   // clawR.rotateTo(115, rotationUnits::deg, false);
-  Claw.rotateTo(200, rotationUnits::deg, false);
+  Claw.rotateTo(900, rotationUnits::deg, false);
 }
 void clawOpen(void) {
   // clawL.rotateTo(-33, rotationUnits::deg, false);
   // clawR.rotateTo(33, rotationUnits::deg, false);
-  Claw.rotateTo(0, rotationUnits::deg, false);
+  Claw.rotateTo(350, rotationUnits::deg, false);
 }
 void usercontrol(void) {
   // User control code here, inside the loop
@@ -301,11 +268,12 @@ void usercontrol(void) {
   Controller2.ButtonR1.pressed(clawOpen);
   Controller2.ButtonL1.pressed(clawPinch);
   while (1) {
-    LeftMotor.spin(vex::directionType::fwd, Controller1.Axis2.position(),
+    LeftMotor.spin(vex::directionType::fwd, Controller1.Axis2.position() * 0.75,
                    vex::velocityUnits::pct);
-    RightMotor.spin(vex::directionType::fwd, Controller1.Axis3.position(),
+    RightMotor.spin(vex::directionType::fwd,
+                    Controller1.Axis3.position() * 0.75,
                     vex::velocityUnits::pct);
-    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position(),
+    BackLift.spin(vex::directionType::rev, Controller2.Axis2.position() / 2.0,
                   vex::velocityUnits::pct);
     FrontLift.spin(vex::directionType::rev, Controller2.Axis3.position() / 3.0,
                    vex::velocityUnits::pct);
