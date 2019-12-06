@@ -190,8 +190,8 @@ void pre_auton(void) {
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
-  Drivetrain.setDriveVelocity(60.0, rpm);
-  Drivetrain.setTurnVelocity(60.0, rpm);
+  Drivetrain.setDriveVelocity(50.0, pct);
+  Drivetrain.setTurnVelocity(50.0, pct);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -208,34 +208,35 @@ void autonomous(void) {
   if (autoSelect == 0) {
     return;
   } else if (autoSelect == 1) {
-    BackLift.rotateTo(-100, degrees);
-    Drivetrain.turnFor(90, degrees);
-    Drivetrain.turnFor(-90, degrees);
-
+    Drivetrain.driveFor(-15.0, inches);
+    Drivetrain.driveFor(15, inches);
     // scores 4 points in (uknown) corner
   } else if (autoSelect == 2) {
-    Drivetrain.driveFor(34.0, inches);
-    Drivetrain.driveFor(-10, inches);
+    Drivetrain.driveFor(-15.0, inches);
+    Drivetrain.driveFor(15, inches);
     // scores 1 point in any corner
   } else if (autoSelect == 3) {
-    Drivetrain.driveFor(-9, inches);
-     Drivetrain.turnFor(-10, degrees);
-    Drivetrain.driveFor(27, inches);
-    Drivetrain.turnFor(-90, degrees);
-    Drivetrain.driveFor(22, inches);
-    Claw.rotateTo(900, degrees, false);
-    wait(0.5, sec);
+    Drivetrain.driveFor(-8.0, inches);
+    Drivetrain.turnFor(-10, degrees);
+    Drivetrain.driveFor(26.5, inches);
+    Drivetrain.turnFor(-32, degrees);
+    Drivetrain.driveFor(17, inches);
     BackLift.rotateTo(-100, degrees);
+    Claw.rotateTo(900, degrees, false);
+    wait(2.0, sec);
+    BackLift.rotateTo(-200, degrees);
     Drivetrain.driveFor(-3, inches);
-    Drivetrain.turnFor(90, degrees);
+    Drivetrain.turnFor(-200, degrees);
+    return;
     Drivetrain.driveFor(36, inches);
-    Drivetrain.turnFor(90, degrees);
-    Drivetrain.driveFor(22, inches);
+    Drivetrain.turnFor(30, degrees);
+    Drivetrain.driveFor(15, inches);
     BackLift.rotateTo(0, degrees);
     Claw.rotateTo(400, degrees);
     // scores 4 points in (unknown) corner
   } else if (autoSelect == 4) {
-    
+    Drivetrain.driveFor(-15.0, inches);
+    Drivetrain.driveFor(15, inches);
     // scores 1 point in any corner
   }
 }
