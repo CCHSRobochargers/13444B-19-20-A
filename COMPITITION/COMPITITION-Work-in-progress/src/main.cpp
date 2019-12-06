@@ -190,8 +190,8 @@ void pre_auton(void) {
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
-  Drivetrain.setDriveVelocity(50.0, pct);
-  Drivetrain.setTurnVelocity(50.0, pct);
+  Drivetrain.setDriveVelocity(65.0, pct);
+  Drivetrain.setTurnVelocity(65.0, pct);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -216,23 +216,25 @@ void autonomous(void) {
     Drivetrain.driveFor(15, inches);
     // scores 1 point in any corner
   } else if (autoSelect == 3) {
-    Drivetrain.driveFor(-8.0, inches);
-    Drivetrain.turnFor(-10, degrees);
-    Drivetrain.driveFor(26.5, inches);
+    Drivetrain.driveFor(-8.5, inches);
+    Drivetrain.driveFor(3, inches);
+    Drivetrain.turnFor(-8, degrees);
+    Drivetrain.driveFor(25, inches);
     Drivetrain.turnFor(-32, degrees);
     Drivetrain.driveFor(17, inches);
-    BackLift.rotateTo(-100, degrees);
+    BackLift.rotateTo(-70, degrees);
     Claw.rotateTo(900, degrees, false);
     wait(2.0, sec);
-    BackLift.rotateTo(-200, degrees);
+    BackLift.rotateTo(-700, degrees);
     Drivetrain.driveFor(-3, inches);
-    Drivetrain.turnFor(-200, degrees);
-    return;
-    Drivetrain.driveFor(36, inches);
-    Drivetrain.turnFor(30, degrees);
-    Drivetrain.driveFor(15, inches);
-    BackLift.rotateTo(0, degrees);
+    Drivetrain.turnFor(-47, degrees);
+    Drivetrain.driveFor(18, inches);
+    Drivetrain.turnFor(-31, degrees);
+    Drivetrain.driveFor(12, inches);
+    BackLift.rotateTo(-70, degrees);
+    wait(2.0, sec);
     Claw.rotateTo(400, degrees);
+    Drivetrain.driveFor(-8, inches);
     // scores 4 points in (unknown) corner
   } else if (autoSelect == 4) {
     Drivetrain.driveFor(-15.0, inches);
